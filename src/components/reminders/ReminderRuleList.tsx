@@ -5,9 +5,40 @@ type Props = {
   products: Product[];
 };
 
+const dayNames: Record<number, string> = {
+  0: "Domingo",
+  1: "Lunes",
+  2: "Martes",
+  3: "Miércoles",
+  4: "Jueves",
+  5: "Viernes",
+  6: "Sábado",
+};
+
 export function ReminderRuleList({ rules, products }: Props) {
   function productName(productId: string) {
     return products.find((p) => p.id === productId)?.name ?? productId;
+  }
+
+  function formatRule(rule: ReminderRule) {
+    if (rule.type === "weekly") {
+      const days = (rule.week_days ?? []).map((d) => dayNames[d]).join(", ");
+      return `Semanal: ${days || "-"}`;
+    }
+
+    if (rule.type === "monthly") {
+      return `Mensual: día ${rule.month_day ?? "-"}`;
+    }
+
+    if (rule.type === "interval") {
+      return `Cada ${rule.interval_days ?? "-"} días`;
+    }
+
+    if (rule.type === "stock") {
+      return `Por stock: avisar cuando sea <= ${rule.trigger_stock ?? "-"}`;
+    }
+
+    return rule.type;
   }
 
   return (
@@ -17,7 +48,7 @@ export function ReminderRuleList({ rules, products }: Props) {
           <li key={rule.id} className="px-4 py-3">
             <div className="font-medium">{productName(rule.product_id)}</div>
             <div className="text-sm text-gray-600">
-              Tipo: {rule.type} · Hora: {rule.notify_time ?? "-"}
+              {formatRule(rule)} · Hora: {rule.notify_time ?? "-"}
             </div>
           </li>
         ))}
