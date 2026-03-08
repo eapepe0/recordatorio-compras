@@ -1,22 +1,22 @@
 import { supabase } from "../lib/supabase";
-import type { ReminderRule } from "../types/db";
+import type { Supplier } from "../types/db";
 
-export type ReminderRuleInput = Omit<
-  ReminderRule,
+export type SupplierInput = Omit<
+  Supplier,
   "id" | "created_at" | "updated_at" | "user_id"
 >;
 
-export async function getReminderRules() {
+export async function getSuppliers() {
   const { data, error } = await supabase
-    .from("reminder_rules")
+    .from("suppliers")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("name", { ascending: true });
 
   if (error) throw error;
-  return data as ReminderRule[];
+  return data as Supplier[];
 }
 
-export async function createReminderRule(input: ReminderRuleInput) {
+export async function createSupplier(input: SupplierInput) {
   const { data: authData, error: authError } = await supabase.auth.getUser();
 
   if (authError) throw authError;
@@ -25,7 +25,7 @@ export async function createReminderRule(input: ReminderRuleInput) {
   if (!user) throw new Error("No autenticado");
 
   const { data, error } = await supabase
-    .from("reminder_rules")
+    .from("suppliers")
     .insert({
       ...input,
       user_id: user.id,
@@ -34,27 +34,27 @@ export async function createReminderRule(input: ReminderRuleInput) {
     .single();
 
   if (error) throw error;
-  return data as ReminderRule;
+  return data as Supplier;
 }
 
-export async function updateReminderRule(
+export async function updateSupplier(
   id: string,
-  input: Partial<ReminderRuleInput>
+  input: Partial<SupplierInput>
 ) {
   const { data, error } = await supabase
-    .from("reminder_rules")
+    .from("suppliers")
     .update(input)
     .eq("id", id)
     .select()
     .single();
 
   if (error) throw error;
-  return data as ReminderRule;
+  return data as Supplier;
 }
 
-export async function deleteReminderRule(id: string) {
+export async function deleteSupplier(id: string) {
   const { error } = await supabase
-    .from("reminder_rules")
+    .from("suppliers")
     .delete()
     .eq("id", id);
 

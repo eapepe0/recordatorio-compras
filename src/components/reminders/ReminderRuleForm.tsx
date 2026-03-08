@@ -1,10 +1,12 @@
-import { useState } from "react";
-import type { Product } from "../../types/db";
+import { useEffect, useState } from "react";
+import type { Product, ReminderRule } from "../../types/db";
 import type { ReminderRuleInput } from "../../services/reminders";
 
 type Props = {
   products: Product[];
   onSubmit: (values: ReminderRuleInput) => Promise<void>;
+  initialValues?: ReminderRule | null;
+  submitLabel?: string;
 };
 
 const weekDaysOptions = [
@@ -17,19 +19,42 @@ const weekDaysOptions = [
   { label: "Sábado", value: 6 },
 ];
 
-export function ReminderRuleForm({ products, onSubmit }: Props) {
-  const [form, setForm] = useState<ReminderRuleInput>({
-    product_id: "",
-    type: "weekly",
-    interval_days: null,
-    week_days: [1],
-    month_day: null,
-    trigger_stock: null,
-    notify_time: "09:00",
-    is_active: true,
-  });
+const emptyForm: ReminderRuleInput = {
+  product_id: "",
+  type: "weekly",
+  interval_days: null,
+  week_days: [1],
+  month_day: null,
+  trigger_stock: null,
+  notify_time: "09:00",
+  is_active: true,
+};
 
+export function ReminderRuleForm({
+  products,
+  onSubmit,
+  initialValues,
+  submitLabel,
+}: Props) {
+  const [form, setForm] = useState<ReminderRuleInput>(emptyForm);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialValues) {
+      setForm({
+        product_id: initialValues.product_id,
+        type: initialValues.type,
+        interval_days: initialValues.interval_days,
+        week_days: initialValues.week_days,
+        month_day: initialValues.month_day,
+        trigger_stock: initialValues.trigger_stock,
+        notify_time: initialValues.notify_time ?? "09:00",
+        is_active: initialValues.is_active,
+      });
+    } else {
+      setForm(emptyForm);
+    }
+  }, [initialValues]);
 
   function toggleWeekDay(day: number) {
     const currentDays = form.week_days ?? [];
@@ -46,15 +71,11 @@ export function ReminderRuleForm({ products, onSubmit }: Props) {
     e.preventDefault();
     setLoading(true);
 
-    if (
-      form.type === "weekly" &&
-      (!form.week_days || form.week_days.length === 0)
-    ) {
-      alert("Seleccioná al menos un día para el recordatorio semanal");
-      setLoading(false);
-      return;
-    }
     try {
+      if (form.type === "weekly" && (!form.week_days || form.week_days.length === 0)) {
+        throw new Error("Seleccioná al menos un día para el recordatorio semanal");
+      }
+
       await onSubmit({
         ...form,
         week_days: form.type === "weekly" ? form.week_days : null,
@@ -63,27 +84,21 @@ export function ReminderRuleForm({ products, onSubmit }: Props) {
         trigger_stock: form.type === "stock" ? form.trigger_stock : null,
       });
 
-      setForm({
-        product_id: "",
-        type: "weekly",
-        interval_days: null,
-        week_days: [1],
-        month_day: null,
-        trigger_stock: null,
-        notify_time: "09:00",
-        is_active: true,
-      });
+      if (!initialValues) {
+        setForm(emptyForm);
+      }
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Error guardando regla");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="grid gap-3 rounded-xl bg-white p-4 shadow-sm"
-    >
-      <h2 className="text-lg font-semibold">Nueva regla</h2>
+    <form onSubmit={handleSubmit} className="grid gap-3 rounded-xl bg-white p-4 shadow-sm">
+      <h2 className="text-lg font-semibold">
+        {initialValues ? "Editar regla" : "Nueva regla"}
+      </h2>
 
       <select
         className="rounded-lg border px-3 py-2"
@@ -121,15 +136,10 @@ export function ReminderRuleForm({ products, onSubmit }: Props) {
 
       {form.type === "weekly" && (
         <div className="rounded-lg border p-3">
-          <div className="mb-2 text-sm font-medium text-gray-700">
-            Días de aviso
-          </div>
+          <div className="mb-2 text-sm font-medium text-gray-700">Días de aviso</div>
           <div className="grid grid-cols-2 gap-2">
             {weekDaysOptions.map((day) => (
-              <label
-                key={day.value}
-                className="flex items-center gap-2 text-sm"
-              >
+              <label key={day.value} className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
                   checked={(form.week_days ?? []).includes(day.value)}
@@ -194,12 +204,21 @@ export function ReminderRuleForm({ products, onSubmit }: Props) {
         onChange={(e) => setForm({ ...form, notify_time: e.target.value })}
       />
 
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={form.is_active}
+          onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
+        />
+        Regla activa
+      </label>
+
       <button
         type="submit"
         disabled={loading}
         className="rounded-lg bg-gray-900 px-4 py-2 font-medium text-white"
       >
-        {loading ? "Guardando..." : "Guardar regla"}
+        {loading ? "Guardando..." : submitLabel ?? "Guardar regla"}
       </button>
     </form>
   );

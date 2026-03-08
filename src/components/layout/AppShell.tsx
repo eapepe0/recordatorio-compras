@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import type { PropsWithChildren } from "react";
+import { signOut } from "../../services/auth";
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-lg px-3 py-2 text-sm font-medium ${
@@ -28,6 +29,15 @@ export function AppShell({ children }: PropsWithChildren) {
             <NavLink to="/compras" className={navClass}>
               Compras
             </NavLink>
+            <NavLink to="/proveedores" className={navClass}>
+              Proveedores
+            </NavLink>
+            <button
+              className="rounded-lg border px-3 py-2 text-sm"
+              onClick={() => signOut()}
+            >
+              Salir
+            </button>
           </nav>
         </div>
       </header>

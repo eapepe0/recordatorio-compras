@@ -4,18 +4,23 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { ReminderRulesPage } from "./pages/ReminderRulesPage";
 import { ShoppingListPage } from "./pages/ShoppingListPage";
+import { Protected } from "./components/auth/Protected";
+import { SuppliersPage } from "./pages/SuppliersPage";
 
 export default function App() {
   return (
     <BrowserRouter>
-      <AppShell>
-        <Routes>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/productos" element={<ProductsPage />} />
-          <Route path="/reglas" element={<ReminderRulesPage />} />
-          <Route path="/compras" element={<ShoppingListPage />} />
-        </Routes>
-      </AppShell>
+      <Protected>
+        <AppShell>
+          <Routes>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/productos" element={<ProductsPage />} />
+            <Route path="/reglas" element={<ReminderRulesPage />} />
+            <Route path="/compras" element={<ShoppingListPage />} />
+            <Route path="/proveedores" element={<SuppliersPage />} />
+          </Routes>
+        </AppShell>
+      </Protected>
     </BrowserRouter>
   );
 }

@@ -1,7 +1,10 @@
 import { supabase } from "../lib/supabase";
 import type { Product } from "../types/db";
 
-export type ProductInput = Omit<Product, "id" | "created_at" | "updated_at">;
+export type ProductInput = Omit<
+  Product,
+  "id" | "created_at" | "updated_at" | "user_id"
+>;
 
 export async function getProducts() {
   const { data, error } = await supabase
@@ -14,9 +17,16 @@ export async function getProducts() {
 }
 
 export async function createProduct(input: ProductInput) {
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData.user;
+  if (!user) throw new Error("No autenticado");
+
   const { data, error } = await supabase
     .from("products")
-    .insert(input)
+    .insert({
+      ...input,
+      user_id: user.id,
+    })
     .select()
     .single();
 
