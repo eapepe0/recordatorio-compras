@@ -25,7 +25,7 @@ export function ProductTable({ products, onEdit, onDelete }: Props) {
             <tr key={product.id} className="border-t">
               <td className="px-4 py-3 font-medium">{product.name}</td>
               <td className="px-4 py-3">{product.category ?? "-"}</td>
-              <td className="px-4 py-3">{product.supplier ?? "-"}</td>
+              <td className="px-4 py-3"> {product.supplier_ref?.name ?? product.supplier ?? "-"}</td>
               <td className="px-4 py-3">{product.stock_current}</td>
               <td className="px-4 py-3">{product.stock_min}</td>
               <td className="px-4 py-3">

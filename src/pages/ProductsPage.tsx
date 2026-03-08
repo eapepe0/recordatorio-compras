@@ -8,18 +8,24 @@ import {
   updateProduct,
   type ProductInput,
 } from "../services/products";
-import type { Product } from "../types/db";
+import { getSuppliers } from "../services/suppliers";
+import type { Product, Supplier } from "../types/db";
 
 export function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [editing, setEditing] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
     try {
       setError(null);
-      const data = await getProducts();
-      setProducts(data);
+      const [productsData, suppliersData] = await Promise.all([
+        getProducts(),
+        getSuppliers(),
+      ]);
+      setProducts(productsData);
+      setSuppliers(suppliersData.filter((s) => s.is_active));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error cargando productos");
     }
@@ -52,6 +58,7 @@ export function ProductsPage() {
       <ProductForm
         onSubmit={handleSubmit}
         initialValues={editing}
+        suppliers={suppliers}
         submitLabel={editing ? "Actualizar producto" : "Guardar producto"}
       />
 

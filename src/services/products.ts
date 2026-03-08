@@ -9,7 +9,10 @@ export type ProductInput = Omit<
 export async function getProducts() {
   const { data, error } = await supabase
     .from("products")
-    .select("*")
+    .select(`
+      *,
+      supplier_ref:suppliers(*)
+    `)
     .order("name", { ascending: true });
 
   if (error) throw error;
@@ -17,7 +20,10 @@ export async function getProducts() {
 }
 
 export async function createProduct(input: ProductInput) {
-  const { data: authData } = await supabase.auth.getUser();
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+
+  if (authError) throw authError;
+
   const user = authData.user;
   if (!user) throw new Error("No autenticado");
 

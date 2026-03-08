@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import type { Product } from "../../types/db";
+import type { Product, Supplier } from "../../types/db";
 import type { ProductInput } from "../../services/products";
 
 type Props = {
   onSubmit: (values: ProductInput) => Promise<void>;
   initialValues?: Product | null;
+  suppliers: Supplier[];
   submitLabel?: string;
 };
 
@@ -12,6 +13,7 @@ const emptyForm: ProductInput = {
   name: "",
   category: "",
   supplier: "",
+  supplier_id: null,
   unit: "unidad",
   stock_current: 0,
   stock_min: 0,
@@ -19,7 +21,12 @@ const emptyForm: ProductInput = {
   notes: "",
 };
 
-export function ProductForm({ onSubmit, initialValues, submitLabel }: Props) {
+export function ProductForm({
+  onSubmit,
+  initialValues,
+  suppliers,
+  submitLabel,
+}: Props) {
   const [form, setForm] = useState<ProductInput>(emptyForm);
   const [loading, setLoading] = useState(false);
 
@@ -29,6 +36,7 @@ export function ProductForm({ onSubmit, initialValues, submitLabel }: Props) {
         name: initialValues.name,
         category: initialValues.category ?? "",
         supplier: initialValues.supplier ?? "",
+        supplier_id: initialValues.supplier_id ?? null,
         unit: initialValues.unit ?? "unidad",
         stock_current: initialValues.stock_current,
         stock_min: initialValues.stock_min,
@@ -64,34 +72,49 @@ export function ProductForm({ onSubmit, initialValues, submitLabel }: Props) {
         onChange={(e) => setForm({ ...form, name: e.target.value })}
         required
       />
+
       <input
         className="rounded-lg border px-3 py-2"
         placeholder="Categoría"
         value={form.category ?? ""}
         onChange={(e) => setForm({ ...form, category: e.target.value })}
       />
-      <input
+
+      <select
         className="rounded-lg border px-3 py-2"
-        placeholder="Proveedor"
-        value={form.supplier ?? ""}
-        onChange={(e) => setForm({ ...form, supplier: e.target.value })}
-      />
+        value={form.supplier_id ?? ""}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            supplier_id: e.target.value || null,
+          })
+        }
+      >
+        <option value="">Sin proveedor</option>
+        {suppliers.map((supplier) => (
+          <option key={supplier.id} value={supplier.id}>
+            {supplier.name}
+          </option>
+        ))}
+      </select>
+
       <div className="grid grid-cols-2 gap-3">
         <input
           className="rounded-lg border px-3 py-2"
-          type="number"
           placeholder="Stock actual"
+          type="number"
           value={form.stock_current}
           onChange={(e) => setForm({ ...form, stock_current: Number(e.target.value) })}
         />
         <input
           className="rounded-lg border px-3 py-2"
-          type="number"
           placeholder="Stock mínimo"
+          type="number"
           value={form.stock_min}
           onChange={(e) => setForm({ ...form, stock_min: Number(e.target.value) })}
         />
       </div>
+
       <textarea
         className="rounded-lg border px-3 py-2"
         placeholder="Notas"

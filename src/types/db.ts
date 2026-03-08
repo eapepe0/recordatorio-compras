@@ -4,6 +4,7 @@ export type Product = {
   name: string;
   category: string | null;
   supplier: string | null;
+  supplier_id?: string | null;
   unit: string | null;
   stock_current: number;
   stock_min: number;
@@ -11,6 +12,7 @@ export type Product = {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  supplier_ref?: Supplier | null;
 };
 
 export type ReminderRuleType = "interval" | "weekly" | "monthly" | "stock";
