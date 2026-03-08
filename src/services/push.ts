@@ -72,6 +72,8 @@ export async function enablePushNotifications(vapidPublicKey: string) {
       throw new Error("La suscripción push no tiene auth");
     }
 
+    localStorage.setItem("current_push_endpoint", json.endpoint);
+    
     const { data: authData, error: authError } = await supabase.auth.getUser();
     if (authError) throw authError;
 

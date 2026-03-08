@@ -9,6 +9,12 @@ export async function sendTestPush() {
   if (sessionError) throw sessionError;
   if (!session?.access_token) throw new Error("No hay sesión activa");
 
+  const endpoint = localStorage.getItem("current_push_endpoint");
+
+  if (!endpoint) {
+    throw new Error("No hay endpoint push guardado en este dispositivo");
+  }
+
   const response = await fetch(
     "https://qbiltrszhurgihdtvemj.supabase.co/functions/v1/send-test-push",
     {
@@ -18,7 +24,7 @@ export async function sendTestPush() {
         Authorization: `Bearer ${session.access_token}`,
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
       },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ endpoint }),
     }
   );
 
