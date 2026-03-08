@@ -13,7 +13,8 @@ export async function getPendingShoppingItemsToday() {
     .from("shopping_items")
     .select(`
       *,
-      product:products(*)
+      product:products(*),
+      supplier:suppliers(*)
     `)
     .eq("status", "pending")
     .eq("due_date", today)
@@ -54,7 +55,8 @@ export async function getRecentShoppingItems(limit = 5) {
     .from("shopping_items")
     .select(`
       *,
-      product:products(*)
+      product:products(*),
+      supplier:suppliers(*)
     `)
     .order("created_at", { ascending: false })
     .limit(limit);
