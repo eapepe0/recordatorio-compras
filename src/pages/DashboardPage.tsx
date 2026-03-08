@@ -10,6 +10,7 @@ import { StatCard } from "../components/dashboard/StatCard";
 import { DashboardSection } from "../components/dashboard/DashboardSection";
 import type { Product, ShoppingItem } from "../types/db";
 import type { ReminderRuleWithProduct } from "../services/dashboard";
+import { sendTestPush } from "../services/testPush";
 
 const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY as string;
 
@@ -81,6 +82,19 @@ export function DashboardPage() {
 
         <button className="rounded-lg border px-4 py-2" onClick={load}>
           Actualizar dashboard
+        </button>
+        <button
+          className="rounded-lg border px-4 py-2"
+          onClick={async () => {
+            try {
+              const result = await sendTestPush();
+              alert(`Push enviado. Suscripciones alcanzadas: ${result.sent}`);
+            } catch (e) {
+              alert(e instanceof Error ? e.message : "Error enviando push");
+            }
+          }}
+        >
+          Probar push
         </button>
       </div>
 
