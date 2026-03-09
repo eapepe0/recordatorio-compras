@@ -9,10 +9,21 @@ export async function sendTestPush() {
   if (sessionError) throw sessionError;
   if (!session?.access_token) throw new Error("No hay sesión activa");
 
-  const endpoint = localStorage.getItem("current_push_endpoint");
+  if (!("serviceWorker" in navigator)) {
+    throw new Error("Este navegador no soporta service workers");
+  }
 
-  if (!endpoint) {
-    throw new Error("No hay endpoint push guardado en este dispositivo");
+  const registration = await navigator.serviceWorker.ready;
+  const subscription = await registration.pushManager.getSubscription();
+
+  if (!subscription) {
+    throw new Error("Este dispositivo no tiene una suscripción push activa");
+  }
+
+  const json = subscription.toJSON();
+
+  if (!json.endpoint) {
+    throw new Error("La suscripción push activa no tiene endpoint");
   }
 
   const response = await fetch(
@@ -24,7 +35,7 @@ export async function sendTestPush() {
         Authorization: `Bearer ${session.access_token}`,
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
       },
-      body: JSON.stringify({ endpoint }),
+      body: JSON.stringify({ endpoint: json.endpoint }),
     }
   );
 
